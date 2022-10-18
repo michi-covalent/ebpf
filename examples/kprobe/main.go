@@ -5,7 +5,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os/exec"
 	"time"
 
 	"github.com/cilium/ebpf/link"
@@ -48,6 +50,16 @@ func main() {
 	// function was entered, once per second.
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
+
+	go func() {
+		curlTicker := time.NewTicker(15 * time.Second)
+		for range curlTicker.C {
+			cmd := exec.Command("/usr/bin/curl", "https://ebpf.io/")
+			if err := cmd.Run(); err != nil {
+				fmt.Println("curl error : ", cmd.Run())
+			}
+		}
+	}()
 
 	log.Println("Waiting for events..")
 
